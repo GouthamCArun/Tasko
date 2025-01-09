@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart'; // Flutter Material Design Widgets
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // Screen utility for responsive design
 import 'package:fluttertoast/fluttertoast.dart'; // Toast messages
+import 'package:tasko/Services/API/insert_task.dart';
 import 'package:tasko/UI/Screens/home/dashboard_screen.dart'; // Your custom dashboard screen
 import 'package:tasko/UI/Themes/styles.dart'; // Your custom styles
 import 'package:syncfusion_flutter_core/theme.dart'; // Syncfusion theming
@@ -17,7 +18,8 @@ class Filterpage extends StatefulWidget {
 
 class _FilterpageState extends State<Filterpage> {
   final TextEditingController _dateController = TextEditingController();
-  late final String formattedDate;
+  late String formattedDate;
+  late String formattedTime;
   List<String> images = [
     'assets/Dashboard/badminton-icon.png',
     'assets/Dashboard/skating-icon.png',
@@ -30,16 +32,16 @@ class _FilterpageState extends State<Filterpage> {
     'Family',
     'Fitness',
   ];
-  List Duration = ['One time', 'Week', 'Month'];
-  double _activeSliderValue = 5;
-
+  List Duration = ['⚡ ASAP', '⏳ Soon', '🌱 Whenever'];
   List _selectedfilter = [];
   String _selectedDate = "This week";
   String _selectedDuration = "One time";
+  TimeOfDay selectedTime = TimeOfDay.now();
+  final TextEditingController taskDescriptionController =
+      TextEditingController();
 
-  var taskDescriptionController;
-
-  var taskNameController;
+  final TextEditingController taskNameController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -250,8 +252,8 @@ class _FilterpageState extends State<Filterpage> {
                                             await showDatePicker(
                                           context: context,
                                           initialDate: DateTime.now(),
-                                          firstDate: DateTime(1930),
-                                          lastDate: DateTime.now(),
+                                          firstDate: DateTime.now(),
+                                          lastDate: DateTime(2050),
                                           builder: (context, child) {
                                             return Theme(
                                               data: ThemeData().copyWith(
@@ -297,7 +299,64 @@ class _FilterpageState extends State<Filterpage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Duration',
+                                    'Time',
+                                    style: filterstyle,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 16.h, left: 16.w, right: 16.w),
+                              child: TextField(
+                                controller: _timeController,
+                                cursorColor: Colors.grey,
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  hintText: 'hh:mm',
+                                  hintStyle: pStyle,
+                                  suffixIcon: IconButton(
+                                    onPressed: () async {
+                                      final TimeOfDay? timeOfDay =
+                                          await showTimePicker(
+                                        context: context,
+                                        initialTime: selectedTime,
+                                        initialEntryMode:
+                                            TimePickerEntryMode.dial,
+                                      );
+
+                                      if (timeOfDay != null) {
+                                        formattedTime =
+                                            '${timeOfDay.hour.toString().padLeft(2, '0')}:${timeOfDay.minute.toString().padLeft(2, '0')}';
+                                        print(formattedTime);
+                                      }
+
+                                      setState(() {
+                                        _timeController.text = formattedTime;
+                                      });
+                                    },
+                                    icon: const Icon(Icons.access_time),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide:
+                                        const BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide:
+                                        const BorderSide(color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 20.h, left: 16.w),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Task Priority',
                                     style: filterstyle,
                                   ),
                                 ],
@@ -347,90 +406,83 @@ class _FilterpageState extends State<Filterpage> {
                                     }),
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(
-                                    style: ButtonStyle(
-                                        elevation:
-                                            const MaterialStatePropertyAll(0),
-                                        shape: MaterialStatePropertyAll(
-                                            RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(14.r),
-                                                side: const BorderSide(
-                                                    color: black100))),
-                                        fixedSize: MaterialStatePropertyAll(
-                                            Size(120.43.w, 53.74.h))),
-                                    onPressed: () {
-                                      setState(
-                                        () {
-                                          _selectedDate = 'This week';
-                                          _selectedDuration = 'One time';
-                                          _activeSliderValue = 5;
-                                          _selectedfilter = [];
-                                        },
-                                      );
-                                    },
-                                    child: Text(
-                                      'RESET',
-                                      style: filterstyle2,
-                                    )),
-                                SizedBox(
-                                  width: 15.w,
-                                ),
-                                ElevatedButton(
-                                  style: ButtonStyle(
-                                      elevation:
-                                          const MaterialStatePropertyAll(0),
-                                      shape: MaterialStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(14.r))),
-                                      backgroundColor:
-                                          const MaterialStatePropertyAll(red1),
-                                      fixedSize: MaterialStatePropertyAll(
-                                          Size(173.43.w, 53.74.h))),
-                                  onPressed: () {
-                                    Fluttertoast.showToast(
-                                        msg: "Fiter's applied ",
-                                        toastLength: Toast.LENGTH_SHORT,
-                                        gravity: ToastGravity.CENTER,
-                                        timeInSecForIosWeb: 1,
-                                        backgroundColor: red1,
-                                        textColor: Colors.white,
-                                        fontSize: 16.0);
-                                    List<String> interests =
-                                        _selectedfilter.cast<String>();
-                                    if (interests.isEmpty) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => Dashboard(
-                                              interestList: [
-                                                'Cricket',
-                                                'Football',
-                                                'Skating',
-                                                'Fitness'
-                                              ]),
-                                        ),
-                                      );
-                                    } else {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => Dashboard(
-                                              interestList: interests),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    'APPLY',
-                                    style: filterstyle5,
-                                  ),
-                                ),
-                              ],
+
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                  elevation: const WidgetStatePropertyAll(0),
+                                  shape: WidgetStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14.r))),
+                                  backgroundColor:
+                                      const WidgetStatePropertyAll(red1),
+                                  fixedSize: WidgetStatePropertyAll(
+                                      Size(360.43.w, 53.74.h))),
+                              onPressed: () async {
+                                print(
+                                    "------------DATA COLLECTED----------------");
+                                print(taskDescriptionController.text);
+                                print(taskNameController.text);
+                                print(formattedDate);
+                                // print(sports);
+                                print(formattedTime);
+                                print(_selectedDuration);
+                                print(_selectedfilter);
+                                List<String> dateParts =
+                                    formattedDate.split('-');
+                                int day = int.parse(dateParts[0]);
+                                int month = int.parse(dateParts[1]);
+                                int year = int.parse(dateParts[2]);
+                                await insertTask(
+                                  taskName: taskNameController.text,
+                                  taskDesc: taskDescriptionController.text,
+                                  taskDate: DateTime(
+                                      year, month, day), // Example date
+                                  taskTime: formattedTime, // Example time
+                                  taskComp: false, // Task incomplete
+                                  taskType: _selectedfilter[0], // Task type
+                                );
+
+                                Fluttertoast.showToast(
+                                    msg: "New Task Created Successfully!",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: red1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                                List<String> interests =
+                                    _selectedfilter.cast<String>();
+                                if (interests.isEmpty) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Dashboard(
+                                          interestList: [
+                                            'Cricket',
+                                            'Football',
+                                            'Skating',
+                                            'Fitness'
+                                          ]),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          Dashboard(interestList: interests),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(
+                                'APPLY',
+                                style: filterstyle5,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20.h,
                             )
                           ],
                         )

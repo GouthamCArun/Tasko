@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasko/Services/API/fetch_completed_task.dart';
+import 'package:tasko/Services/API/fetch_task.dart';
 
 import '../../Components/DetailsScreen/location_screen.dart';
 import '../../Themes/colors.dart';
@@ -334,15 +336,10 @@ class _DashboardState extends State<Dashboard> {
                   child: isComptaskSelected
                       ? Padding(
                           padding: EdgeInsets.only(bottom: 20.h),
-                          child: ProgramList(
-                            programs: programs,
-                            sportsList: widget.interestList,
-                          ),
-                        )
+                          child: TaskList())
                       : Padding(
                           padding: EdgeInsets.only(bottom: 20.h),
-                          child: TrainerList(),
-                        ),
+                          child: CompletedTaskList()),
                 ),
                 // Sliding page
               ],
@@ -354,375 +351,371 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-class ProgramList extends StatefulWidget {
-  final List<Map<String, dynamic>> programs;
-  final List<String> sportsList;
-
-  ProgramList({Key? key, required this.programs, required this.sportsList});
-
+class CompletedTaskList extends StatefulWidget {
   @override
-  _ProgramListState createState() => _ProgramListState();
+  _CompletedTaskListState createState() => _CompletedTaskListState();
 }
 
-class _ProgramListState extends State<ProgramList> {
+class _CompletedTaskListState extends State<CompletedTaskList> {
+  final CompletedTaskService _completedTaskService = CompletedTaskService();
+  late Future<List<Map<String, dynamic>>> _completedTasks;
+
+  @override
+  void initState() {
+    super.initState();
+    _completedTasks = _completedTaskService.fetchCompletedTasks();
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> extractedInfoList = [];
-    for (var item in widget.programs) {
-      item.forEach((sport, data) {
-        if (data is List &&
-            data.isNotEmpty &&
-            data[0] == "True" &&
-            widget.sportsList.contains(sport)) {
-          var sportData = data[1];
-          String courseName = sportData['CourseName'];
-          String trainerName = sportData['TrainerName'];
-          String duration = sportData['Duration'];
-          String location = sportData['Location'];
-          String description = sportData['Description'];
-          String price = sportData['Price'];
-          String learning = sportData['Learning'];
-          String prerequisites =
-              sportData['Prerequisites']; // Directly access as string
-          List<String> prerequisitesList = prerequisites != null
-              ? prerequisites.split(',').map((e) => e.trim()).toList()
-              : [];
-          String courseOutcome =
-              sportData['CourseOutcome']; // Directly access as string
-          List<String> courseOutcomeList = courseOutcome != null
-              ? courseOutcome.split(',').map((e) => e.trim()).toList()
-              : [];
-
-          Map<String, dynamic> infoMap = {
-            'Sport': sport,
-            'CourseName': courseName,
-            'TrainerName': trainerName,
-            'Duration': duration,
-            'Location': location,
-            'Description': description,
-            'Prerequisites': prerequisitesList,
-            'CourseOutcome': courseOutcomeList,
-            'Learning': learning,
-            'Price': price
-          };
-
-          extractedInfoList.add(infoMap);
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _completedTasks,
+      builder: (context, snapshot) {
+        // Checking if the connection is still waiting
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
         }
-      });
-    }
 
-    return ListView.builder(
-      itemCount: extractedInfoList.length,
-      padding: const EdgeInsets.all(0.0),
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white, // Changed background color to white
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(
-                  color: lightred2), // Added border with lightred2 color
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(10.0.r),
-              child: Column(
-                children: [
-                  Row(
+        // Handle errors with a null check for data
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        // Check if there's no data
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No completed tasks available.'));
+        }
+
+        // Extract the data safely
+        List<Map<String, dynamic>> extractedInfoList = snapshot.data!;
+        print(extractedInfoList);
+        return ListView.builder(
+          itemCount: extractedInfoList.length,
+          padding: const EdgeInsets.all(0.0),
+          itemBuilder: (context, index) {
+            // Null checks before accessing data
+            var courseName =
+                extractedInfoList[index]['task_name'] ?? 'Unknown Task ';
+            var trainerName = extractedInfoList[index]['task_desc'] ?? '.....';
+            var duration = extractedInfoList[index]['task_date'] ?? 'N/A';
+            var location =
+                extractedInfoList[index]['task_time'] ?? 'Unknown Location';
+
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.red),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.all(6.0.r),
-                        child: Image.asset(
-                          'assets/Dashboard/yoga-icon.png',
-                          width: 64.w,
-                          height: 64.h,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(6.0),
+                            child: Image.asset(
+                              'assets/Dashboard/yoga-icon.png',
+                              width: 64.0,
+                              height: 64.0,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(extractedInfoList[index]['CourseName']!,
-                                    style: dashboardtextstyle),
-                                Container(
-                                  height: 30.h,
-                                  width: 50.w,
-                                  decoration: BoxDecoration(
-                                    color: grey, // Set background color to grey
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  padding: EdgeInsets.all(8.0.r),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        '10+',
-                                        style: GoogleFonts.inter(
-                                            color:
-                                                black700, // Set text color to black
-                                            fontSize: 10.sp,
-                                            fontWeight: FontWeight.w400),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      courseName,
+                                      style: TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Container(
+                                      height: 30.0,
+                                      width: 50.0,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
                                       ),
-                                      SizedBox(width: 2.0.sp),
-                                      Image.asset(
-                                        'assets/Dashboard/people-icon.png',
-                                        width: 10.w,
-                                        height: 10.h,
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            '10+',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 10.0),
+                                          ),
+                                          SizedBox(width: 2.0),
+                                          Image.asset(
+                                            'assets/Dashboard/people-icon.png',
+                                            width: 10.0,
+                                            height: 10.0,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  trainerName,
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(duration,
+                                        style: TextStyle(fontSize: 14.0)),
+                                    SizedBox(width: 10.0),
+                                    Text('• ',
+                                        style: TextStyle(fontSize: 14.0)),
+                                    Text(location,
+                                        style: TextStyle(fontSize: 14.0)),
+                                  ],
                                 ),
                               ],
                             ),
-                            Text(extractedInfoList[index]['TrainerName']!,
-                                style: dashboardtextstyle2),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 2.0),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 8.0),
                             Row(
                               children: [
-                                Text(extractedInfoList[index]['Duration']!,
-                                    style: dashboardtextstyle2),
-                                SizedBox(width: 10.w),
-                                Text('• ', // Grey dot
-                                    style: dashboardtextstyle2),
-                                Text(extractedInfoList[index]['Location']!,
-                                    style: dashboardtextstyle2),
+                                for (var tag in ['Yoga', 'Fitness', 'Health'])
+                                  Container(
+                                    margin: EdgeInsets.only(right: 10.0),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: Text(tag,
+                                          style: TextStyle(fontSize: 12.0)),
+                                    ),
+                                  ),
                               ],
                             ),
                           ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 5.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 16.0),
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(13.0)),
+                            ),
+                          ),
+                          onPressed: () async {
+                            // Navigate to JoinCourse or handle accordingly
+                            // await Navigator.of(context).push(
+                            //   MaterialPageRoute(
+                            //     builder: (context) => JoinCourse(
+                            //       courseId: index,
+                            //       courseInfo: extractedInfoList[index],
+                            //     ),
+                            //   ),
+                            // );
+                          },
+                          child: Text('Join the Course',
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ),
                     ],
                   ),
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.h, horizontal: 2.w),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 8.w),
-                        Row(
-                          children: [
-                            for (var tag in ['Yoga', 'Fitness', 'Health'])
-                              Container(
-                                margin: EdgeInsets.only(right: 10.0.w),
-                                padding: EdgeInsets.symmetric(vertical: 4.0.h),
-                                decoration: BoxDecoration(
-                                  color: grey,
-                                  borderRadius: BorderRadius.circular(10.0.r),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 10.0.h, right: 10.h),
-                                  child: Text(tag, // Tags
-                                      style: dashboardtextstyle3),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5.h),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.only(
-                            top: 8.h, left: 16.w, bottom: 8.h, right: 16.w),
-                        foregroundColor: white400,
-                        backgroundColor: red1,
-                        minimumSize: Size(311.w, 32.h),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                          Radius.circular(13.r),
-                        )),
-                      ),
-                      onPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: ((context) => JoinCourse(
-                                  courseId: index,
-                                  courseInfo: extractedInfoList[index],
-                                )),
-                          ),
-                        );
-                      },
-                      child:
-                          Text('Join the Course', style: dashboardtextstyle4),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
   }
 }
 
-class TrainerList extends StatelessWidget {
-  final List<Map<String, dynamic>> trainers = [
-    {
-      'category': 'Yoga',
-      'ongoingPrograms': 3,
-      'rating': 4.6,
-      'name': 'Rajath K',
-      'tags': ['Core', 'Full Body', 'Glutes'],
-    },
-    {
-      'category': 'Yoga',
-      'ongoingPrograms': 3,
-      'rating': 4.6,
-      'name': 'Rajath K',
-      'tags': ['Core', 'Full Body', 'Glutes'],
-    },
-    {
-      'category': 'Yoga',
-      'ongoingPrograms': 3,
-      'rating': 4.6,
-      'name': 'Rajath K',
-      'tags': ['Core', 'Full Body', 'Glutes'],
-    },
-    {
-      'category': 'Yoga',
-      'ongoingPrograms': 3,
-      'rating': 4.6,
-      'name': 'Rajath K',
-      'tags': ['Core', 'Full Body', 'Glutes'],
-    },
-    {
-      'category': 'Yoga',
-      'ongoingPrograms': 3,
-      'rating': 4.6,
-      'name': 'Rajath K',
-      'tags': ['Core', 'Full Body', 'Glutes'],
-    },
-  ];
+class TaskList extends StatefulWidget {
+  const TaskList({super.key});
 
-  TrainerList({super.key});
+  @override
+  State<TaskList> createState() => _TaskListState();
+}
+
+class _TaskListState extends State<TaskList> {
+  final FetchTaskService _fetchTaskService = FetchTaskService();
+  late Future<List<Map<String, dynamic>>> _tasksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _tasksFuture = _fetchTaskService.fetchTasks();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(0.0),
-      itemCount: trainers.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10.0.r),
-              border: Border.all(color: Colors.red), // Red outline border
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(trainers[index]['category'], // Category
-                          style: dashboardtextstyle5),
-                      SizedBox(width: 5.w),
-                      Text(
-                        '•', // Dot separator
-                        style: GoogleFonts.inter(
-                          color: darkgrey,
-                          fontSize: 12.sp,
-                        ),
-                      ),
-                      SizedBox(width: 5.w),
-                      Text(
-                          '${trainers[index]['ongoingPrograms']} Ongoing Programs', // Number of ongoing programs
-                          style: dashboardtextstyle2),
-                      const Spacer(), // Spacer to push the rating and name to the right
-                      Container(
-                        height: 30.h,
-                        width: 45.w,
-                        decoration: BoxDecoration(
-                          color: grey, // Set background color to grey
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        padding: EdgeInsets.all(8.0.r),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+    return Scaffold(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _tasksFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+
+          final tasks = snapshot.data ?? [];
+
+          if (tasks.isEmpty) {
+            return const Center(child: Text('No tasks available.'));
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: tasks.length,
+            itemBuilder: (context, index) {
+              final task = tasks[index];
+              final taskName = task['task_name'] ?? 'Unnamed Task';
+              final taskDesc = task['task_desc'];
+              final taskDate = task['task_date'];
+              final taskTime = task['task_time'];
+              final taskCompleted = task['task_comp'] == true;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(color: Colors.blue),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Task Name and Status
+                        Row(
                           children: [
-                            Text(
-                              '${trainers[index]['rating']}',
-                              style: GoogleFonts.inter(
-                                color: Colors.black, // Set text color to black
-                                fontSize: 10.sp,
+                            Expanded(
+                              child: Text(
+                                taskName,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            SizedBox(width: 2.0.sp),
-                            Image.asset(
-                              'assets/Dashboard/star-icon.png',
-                              // width: 10.w,
-                              // height: 10.h,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                                horizontal: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: taskCompleted
+                                    ? Colors.green.withOpacity(0.2)
+                                    : Colors.red.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: Text(
+                                taskCompleted ? 'Completed' : 'Pending',
+                                style: TextStyle(
+                                  color:
+                                      taskCompleted ? Colors.green : Colors.red,
+                                  fontSize: 12.0,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 25.r, // Adjust the size of the circular image
-                        backgroundImage: const AssetImage(
-                            'assets/Dashboard/trainer-icon.png'),
-                      ),
-                      SizedBox(
-                          width: 10.0
-                              .w), // Adjust the distance between the image and the text (name and tags
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        const SizedBox(height: 10.0),
+
+                        // Task Description
+                        if (taskDesc != null)
                           Text(
-                            trainers[index]['name'], // Trainer name
-                            style: GoogleFonts.inter(
-                              color: Colors.black,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+                            taskDesc,
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.black54,
                             ),
                           ),
-                          SizedBox(height: 8.0.h),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.start,
-                            children: [
-                              for (var tag in trainers[index]['tags'])
-                                Container(
-                                  margin: EdgeInsets.only(
-                                      right: 5.0.w, bottom: 5.0.h),
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 4.0.h, horizontal: 8.0.w),
-                                  decoration: BoxDecoration(
-                                    color: grey,
-                                    borderRadius: BorderRadius.circular(10.0.r),
+                        const SizedBox(height: 10.0),
+
+                        // Task Date and Time
+                        Row(
+                          children: [
+                            if (taskDate != null)
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    size: 16.0,
+                                    color: Colors.blue,
                                   ),
-                                  child: Text(
-                                    tag, // Tags
-                                    style: GoogleFonts.inter(
-                                      color: darkgrey,
+                                  const SizedBox(width: 4.0),
+                                  Text(
+                                    taskDate,
+                                    style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
+                                ],
+                              ),
+                            const Spacer(),
+                            if (taskTime != null)
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 16.0,
+                                    color: Colors.blue,
+                                  ),
+                                  const SizedBox(width: 4.0),
+                                  Text(
+                                    taskTime,
+                                    style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
