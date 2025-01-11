@@ -97,4 +97,4 @@ Watch the demo video to see Tasko in action:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/tasko.git
+   git clone https://github.com/GouthamCArun/Tasko.git
