@@ -29,8 +29,6 @@ Tasko is a robust task management application designed to streamline your daily 
 
 - **Task Organization**: Categorize and prioritize your tasks.
 - **Smart Reminders**: Never miss a deadline with smart notification features.
-- **Collaborative Tools**: Share tasks with your team for effective collaboration.
-- **Progress Tracking**: Visualize your task completion with progress indicators.
 - **Cross-Platform Compatibility**: Seamless performance across iOS and Android.
 
 ---
