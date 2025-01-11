@@ -2,6 +2,7 @@ import 'package:flutter/material.dart'; // Flutter Material Design Widgets
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // Screen utility for responsive design
 import 'package:fluttertoast/fluttertoast.dart'; // Toast messages
 import 'package:tasko/Services/API/insert_task.dart';
+import 'package:tasko/Services/API/notifi_services.dart';
 import 'package:tasko/UI/Screens/home/dashboard_screen.dart'; // Your custom dashboard screen
 import 'package:tasko/UI/Themes/styles.dart'; // Your custom styles
 import 'package:syncfusion_flutter_core/theme.dart'; // Syncfusion theming
@@ -409,78 +410,83 @@ class _FilterpageState extends State<Filterpage> {
 
                             ElevatedButton(
                               style: ButtonStyle(
-                                  elevation: const WidgetStatePropertyAll(0),
-                                  shape: WidgetStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(14.r))),
-                                  backgroundColor:
-                                      const WidgetStatePropertyAll(red1),
-                                  fixedSize: WidgetStatePropertyAll(
-                                      Size(360.43.w, 53.74.h))),
+                                elevation: const WidgetStatePropertyAll(0),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(14.r)),
+                                ),
+                                backgroundColor:
+                                    const WidgetStatePropertyAll(red1),
+                                fixedSize: WidgetStatePropertyAll(
+                                    Size(360.43.w, 53.74.h)),
+                              ),
                               onPressed: () async {
                                 print(
                                     "------------DATA COLLECTED----------------");
                                 print(taskDescriptionController.text);
                                 print(taskNameController.text);
                                 print(formattedDate);
-                                // print(sports);
                                 print(formattedTime);
                                 print(_selectedDuration);
                                 print(_selectedfilter);
+
                                 List<String> dateParts =
                                     formattedDate.split('-');
                                 int day = int.parse(dateParts[0]);
                                 int month = int.parse(dateParts[1]);
                                 int year = int.parse(dateParts[2]);
+
+                                // Parse time from `formattedTime`
+                                List<String> timeParts =
+                                    formattedTime.split(':');
+                                int hour = int.parse(timeParts[0]);
+                                int minute = int.parse(timeParts[1]);
+
+                                DateTime taskDateTime =
+                                    DateTime(year, month, day, hour, minute);
+
+                                // Call insertTask function
                                 await insertTask(
                                   taskName: taskNameController.text,
                                   taskDesc: taskDescriptionController.text,
-                                  taskDate: DateTime(
-                                      year, month, day), // Example date
-                                  taskTime: formattedTime, // Example time
-                                  taskComp: false, // Task incomplete
-                                  taskType: _selectedfilter[0], // Task type
+                                  taskDate: DateTime(year, month, day),
+                                  taskTime: formattedTime,
+                                  taskComp: false,
+                                  taskType: _selectedfilter[0],
+                                );
+
+                                // Schedule a notification for the task
+                                await NotificationService.scheduleNotification(
+                                  0, // Notification ID (use unique IDs if scheduling multiple notifications)
+                                  "🚀 Time to crush it! Finish: ${taskNameController.text} 💪✨",
+                                  taskDescriptionController.text,
+                                  taskDateTime,
                                 );
 
                                 Fluttertoast.showToast(
-                                    msg: "New Task Created Successfully!",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: red1,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                                List<String> interests =
-                                    _selectedfilter.cast<String>();
-                                if (interests.isEmpty) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => Dashboard(
-                                          interestList: [
-                                            'Cricket',
-                                            'Football',
-                                            'Skating',
-                                            'Fitness'
-                                          ]),
-                                    ),
-                                  );
-                                } else {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          Dashboard(interestList: interests),
-                                    ),
-                                  );
-                                }
+                                  msg: "New Task Created Successfully!",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: red1,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+
+                                // Navigate to Dashboard
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Dashboard()),
+                                );
                               },
                               child: Text(
                                 'APPLY',
                                 style: filterstyle5,
                               ),
                             ),
+
                             SizedBox(
                               height: 20.h,
                             )
@@ -540,7 +546,7 @@ class _FilterpageState extends State<Filterpage> {
                   ),
                   child: Icon(
                     Icons.add,
-                    color: Colors.blue, // Blue color for the "+" icon
+                    color: red, // Blue color for the "+" icon
                     size: 24, // Adjust icon size
                   ),
                 ),

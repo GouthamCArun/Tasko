@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tasko/UI/Components/DetailsScreen/date_birth.dart';
-import 'package:tasko/UI/Components/DetailsScreen/email_screen.dart';
+import 'package:tasko/UI/Screens/Intro/date_birth.dart';
+import 'package:tasko/UI/Screens/Intro/email_screen.dart';
+import '../../Intro/name_screen.dart';
 
-import '../../../Components/DetailsScreen/gender_screen.dart';
-import '../../../Components/DetailsScreen/name_screen.dart';
-import '../../../Components/DetailsScreen/wh_screen.dart';
 import '../../../Themes/colors.dart';
 
 class DetailInputContainer extends StatefulWidget {
@@ -70,22 +68,6 @@ class _DetailInputContainerState extends State<DetailInputContainer> {
               );
             },
           ),
-          GenderScreen(
-            previousPage: () {
-              _pageController.animateToPage(
-                1,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.ease,
-              );
-            },
-            nextPage: () {
-              _pageController.animateToPage(
-                3,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.ease,
-              );
-            },
-          ),
           DateOfBirthScreen(
             previousPage: () {
               _pageController.animateToPage(
@@ -102,22 +84,6 @@ class _DetailInputContainerState extends State<DetailInputContainer> {
               );
             },
           ),
-          WhScreen(
-            previousPage: () {
-              _pageController.animateToPage(
-                3,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.ease,
-              );
-            },
-            nextPage: () {
-              _pageController.animateToPage(
-                5,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.ease,
-              );
-            },
-          )
         ],
       ),
     );

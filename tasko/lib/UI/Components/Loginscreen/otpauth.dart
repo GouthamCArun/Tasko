@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:tasko/UI/Components/Loginscreen/get_started_page.dart';
+import 'package:tasko/UI/Screens/Intro/get_started_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Services/API/phone_auth.dart';

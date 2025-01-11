@@ -17,7 +17,7 @@ class DetailsPage extends StatelessWidget {
             decoration: const BoxDecoration(
                 image: DecorationImage(
               fit: BoxFit.cover,
-              image: AssetImage('assets/Detailspage/backimage.png'),
+              image: AssetImage('assets/Detailspage/backimage.jpg'),
             )),
           ),
           const Align(

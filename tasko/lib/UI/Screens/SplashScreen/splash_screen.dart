@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tasko/UI/Components/DetailsScreen/interest_screen.dart';
-import 'package:tasko/UI/Components/Loginscreen/get_started_page.dart';
-import 'package:tasko/UI/Screens/Landingpage/landingpage.dart';
+
+import 'package:tasko/UI/Screens/Intro/get_started_page.dart';
+
 import 'package:tasko/UI/Screens/home/dashboard_screen.dart';
 import 'package:tasko/UI/Themes/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,30 +25,12 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isLoggedin == null || isLoggedin == false) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => const Dashboard(
-                  interestList: [
-                    'Cricket',
-                    'Football',
-                    'Badminton',
-                    'Skating',
-                    'Yoga'
-                  ],
-                )),
+        MaterialPageRoute(builder: (context) => GetStartedPage()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => Dashboard(
-                  interestList: [
-                    'Cricket',
-                    'Football',
-                    'Badminton',
-                    'Skating',
-                    'Yoga'
-                  ],
-                )),
+        MaterialPageRoute(builder: (context) => GetStartedPage()),
       );
     }
   }
