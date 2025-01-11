@@ -41,17 +41,13 @@ Tasko is a robust task management application designed to streamline your daily 
   <br>
   1. <b>Flutter</b>: Cross-platform app development.
   <br>
-  2. <b>Firebase</b>: Real-time database and authentication.
+  2. <b>Supabase</b>: Real-time database and authentication.
   <br>
   3. <b>Provider</b>: State management.
   <br>
   4. <b>Flutter Local Notifications</b>: Notification scheduling.
   <br>
-  5. <b>Django REST API</b>: Backend for API calls.
-  <br>
-  6. <b>SQLite</b>: Offline task storage.
-  <br>
-  7. <b>Railway</b>: Hosting backend services.
+  
 </h3>
 
 ---
