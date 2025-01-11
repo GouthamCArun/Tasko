@@ -2,7 +2,7 @@
 
 <h1 align="center">
   <br>
-  <img src="assets/tasko_logo.png" alt="Tasko Logo" width="400">
+  <img src="tasko_logo.png" alt="Tasko Logo" width="400">
   <br>
   Tasko
   <br>
