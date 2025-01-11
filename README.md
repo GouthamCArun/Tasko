@@ -64,6 +64,7 @@ Tasko is a robust task management application designed to streamline your daily 
   <img src="screen3.jpg" alt="Screenshot 3" width="30%" style="margin:10px;">
   <img src="screen4.jpg" alt="Screenshot 4" width="30%" style="margin:10px;">
   <img src="screen5.jpg" alt="Screenshot 5" width="30%" style="margin:10px;">
+  <img src="screen6.jpg" alt="Screenshot 6" width="30%" style="margin:10px;">
 </div>
 
 ---
