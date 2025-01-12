@@ -14,10 +14,10 @@ class DetailsPage extends StatelessWidget {
         children: [
           Container(
             height: 560.h,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
                 image: DecorationImage(
               fit: BoxFit.cover,
-              image: AssetImage('assets/Detailspage/backimage.jpg'),
+              image: AssetImage('assets/DetailsPage/backimage.jpg'),
             )),
           ),
           const Align(

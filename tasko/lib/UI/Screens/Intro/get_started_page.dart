@@ -13,7 +13,7 @@ class GetStartedPage extends StatelessWidget {
       backgroundColor: red,
       body: SizedBox(
         child: Padding(
-          padding: EdgeInsets.only(left: 30.w, top: 100.h, right: 30.w),
+          padding: EdgeInsets.only(left: 30.w, top: 50.h, right: 30.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,11 +22,7 @@ class GetStartedPage extends StatelessWidget {
                 'Hey there,',
                 style: startheadstyle,
               ),
-              Center(
-                child: Image.asset(
-                  'assets/Landingpage/moto.png',
-                ),
-              ),
+              Center(child: Image.asset('assets/LandingPage/moto.png')),
               Center(
                 child: SizedBox(
                     width: 212.w,

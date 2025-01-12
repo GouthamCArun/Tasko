@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tasko/UI/Components/Loginscreen/otpauth.dart';
+// import 'package:tasko/UI/Components/Loginscreen/otpauth.dart';
 
 import '../../../Components/Loginscreen/signinpage.dart';
 import '../../../Themes/colors.dart';
@@ -49,15 +49,6 @@ class _InputContainerState extends State<InputContainer> {
               _pageController.animateToPage(
                 2,
                 duration: const Duration(milliseconds: 1000),
-                curve: Curves.ease,
-              );
-            },
-          ),
-          OtpAuth(
-            nextPage: () {
-              _pageController.animateToPage(
-                0,
-                duration: const Duration(milliseconds: 500),
                 curve: Curves.ease,
               );
             },
