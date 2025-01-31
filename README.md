@@ -80,10 +80,11 @@ You can download the latest APK of Tasko using the link below:
 Watch the demo video to see Tasko in action:
 
 <div align="center">
-  <a href="https://youtu.be/BPKMJep1U-c" target="_blank">
+  <a href="https://youtube.com/shorts/v32c3R9Y2xg" target="_blank">
     <img src="https://img.shields.io/badge/Watch-Demo-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo">
   </a>
 </div>
+
 
 
 ---
